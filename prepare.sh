@@ -160,7 +160,7 @@ then
   rm -rf /var/lib/teleport
   while [ \$ready -eq 0 ]
   do
-    kubectl exec pod/teleport-bz-horst tctl nodes add 2> /dev/null > nodes-add.out
+    kubectl exec "pod/teleport-\$CLUSTERNAME" tctl nodes add 2> /dev/null > nodes-add.out
     if [ \$? -eq 0 ]
     then
       ready=1
