@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-
+apt-get update -yy
+apt-get upgrade -yy
 apt-get install -yy sharutils 
 
 cat > setup-home-pal.sh <<EOF
