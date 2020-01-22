@@ -1,0 +1,11 @@
+[Unit]
+Description=ESPHOME Dashboard
+Wants=network-online.target
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+Restart=on-failure
+ExecStart=/bin/bash -c "cd %BASEDIR%/esphome && esphome . dashboard"

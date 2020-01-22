@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: node-red-pd
+  labels:
+    run: node-red-pd
+spec:
+  containers:
+  - image: nodered/node-red:latest
+    name: node-red-container
+    env:
+    - name: TZ
+      value: "Europe/Berlin"
+    ports:
+    - containerPort: 1880
+      protocol: TCP
+    - containerPort: 2062
+      protocol: TCP
+    - containerPort: 2063
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /data
+      name: node-red-data
+  volumes:
+  - name: node-red-data
+    hostPath:
+      path: %BASEDIR%/node-red
+      type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-red-pd
+spec:
+  type: NodePort
+  ports:
+  - port: 1880
+    name: 1880tcp
+    targetPort: 1880
+    protocol: TCP
+    nodePort: 1880
+  - port: 2062
+    name: 2062tcp
+    targetPort: 2062
+    protocol: TCP
+    nodePort: 2062
+  - port: 2063
+    name: 2063tcp
+    targetPort: 2063
+    protocol: TCP
+    nodePort: 2063
+  selector:
+    run: node-red-pd

@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: zigbee2mqtt-pd
+  labels:
+    run: zigbee2mqtt-pd
+spec:
+  containers:
+  - image: koenkk/zigbee2mqtt:latest
+    name: zigbee2mqtt-container
+    securityContext:
+      privileged: true
+    env:
+    - name: TZ
+      value: "Europe/Berlin"
+    ports:
+    - containerPort: 8011
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /app/data
+      name: appdata
+    - mountPath: /dev/ttyACM0
+      name: ttyacm0
+  volumes:
+  - name: ttyacm0
+    hostPath:
+      path: /dev/ttyACM0
+      type: CharDevice
+  - name: appdata
+    hostPath:
+      path: /%BASEDIR%/zigbee2mqtt
+      type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zigbee2mqtt-pd
+spec:
+  type: NodePort
+  ports:
+  - port: 8011
+    name: 8011tcp
+    targetPort: 8011
+    protocol: TCP
+    nodePort: 8011
+  selector:
+    run: zigbee2mqtt-pd

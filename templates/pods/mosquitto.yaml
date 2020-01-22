@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mosquitto-pd
+  labels:
+    run: mosquitto-pd
+spec:
+  containers:
+  - image: library/eclipse-mosquitto
+    name: mosquitto-container
+    ports:
+    - containerPort: 1883
+      protocol: TCP
+#    - containerPort: 9001
+#      protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mosquitto-pd
+spec:
+  type: NodePort
+  ports:
+  - port: 1883
+    name: 1883tcp
+    targetPort: 1883
+    protocol: TCP
+    nodePort: 1883
+  selector:
+    run: mosquitto-pd

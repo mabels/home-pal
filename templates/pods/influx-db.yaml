@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: influx-db-pd
+  labels:
+    run: influx-db-pd
+spec:
+  containers:
+  - image: influxdb
+    name: influx-db-container
+    env:
+    - name: TZ
+      value: "Europe/Berlin"
+    ports:
+    - containerPort: 8086
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /var/lib/influxdb
+      name: influx-db-vol
+
+  - image: chronograf
+    name: chronograf-container
+    command: ["chronograf", "--influxdb-url=http://127.0.0.1:8086"]
+    env:
+    - name: TZ
+      value: "Europe/Berlin"
+    ports:
+    - containerPort: 8888
+      protocol: TCP
+    volumeMounts:
+    - mountPath: /var/lib/chronograf
+      name: chronograf-vol
+
+
+  volumes:
+  - name: influx-db-vol
+    hostPath:
+      path: %BASEDIR%/influx-db
+      type: DirectoryOrCreate
+  - name: chronograf-vol
+    hostPath:
+      path: %BASEDIR%/chronograf
+      type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: influx-db-pd
+spec:
+  type: NodePort
+  ports:
+  - port: 8086
+    name: 8086tcp
+    targetPort: 8086
+    protocol: TCP
+    nodePort: 8086
+  - port: 8888
+    name: 8888tcp
+    targetPort: 8888
+    protocol: TCP
+    nodePort: 8888
+  selector:
+    run: influx-db-pd
