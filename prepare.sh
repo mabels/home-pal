@@ -66,7 +66,7 @@ done
 installK3S=1
 if [ -f /usr/local/bin/k3s ]
 then
-  kubectl get nodes 2> /dev/null | grep -e '^\$CLUSTERNAME\s\s*Ready'
+  kubectl get nodes 2> /dev/null | grep -e "^\$CLUSTERNAME\\s\\s*Ready"
   if [ \$? -eq 0 ]
   then
     installK3S=0
@@ -78,7 +78,7 @@ then
   ready=0
   while [ \$ready -eq 0 ]
   do
-    kubectl get nodes 2> /dev/null | grep -e '^\$CLUSTERNAME\s\s*Ready'
+    kubectl get nodes 2> /dev/null | grep -e "^\$CLUSTERNAME\\s\\s*Ready"
     if [ \$? -eq 0 ]
     then
       ready=1 
@@ -88,21 +88,6 @@ then
     fi
   done
 fi
-
-#templates/etc/systemd/system/teleport.service:   --token=%TELEPORT_TOKEN% \
-#templates/etc/systemd/system/teleport.service:   --ca-pin=%TELEPORT_CA_PIN% \
-
-#templates/pods/influx-db.yaml:      path: /%BASEDIR%/influx-db
-#templates/pods/influx-db.yaml:      path: /%BASEDIR%/chronograf
-#templates/pods/zigbee2mqtt.yaml:      path: /%BASEDIR%/zigbee2mqtt
-#templates/pods/node-red.yaml:      path: /%BASEDIR%/node-red
-#templates/pods/hass-io.yaml:      path: /%BASEDIR%/hass.io
-#templates/pods/teleport.yaml:  name: teleport-%CLUSTERNAME%
-#templates/pods/teleport.yaml:    run: teleport-%CLUSTERNAME%
-#templates/pods/teleport.yaml:      path: /%BASEDIR%/teleport/teleport.yaml
-#templates/pods/teleport.yaml:      path: /%BASEDIR%/teleport/lib
-#templates/pods/teleport.yaml:  name: teleport-%CLUSTERNAME%
-#templates/pods/teleport.yaml:    run: teleport-%CLUSTERNAME%
 
 for pod in \$(find templates/pods -type f)
 do
@@ -147,7 +132,7 @@ do
    ready=0
    while [ \$ready -eq 0 -a \$(basename \$pod .yaml) = 'teleport' -a \$applyJoinToken -eq 1 ]
    do
-      kubectl exec -ti "pod/\$podName" tctl help > /dev/null 2> /dev/null
+      kubectl logs "pod/\$podName" | grep '\[AUTH\]\s\s*Auth service is starting'
       if [ \$? -eq 0 ]
       then
         echo "Add to Trusted cluster teleport.adviser.com"
@@ -170,9 +155,12 @@ fi
 if [ ! -f /etc/systemd/system/teleport.service.d/pins.conf ]
 then
   ready=0
+  systemctl daemon-reload
+  systemctl stop teleport.service
+  rm -rf /var/lib/teleport
   while [ \$ready -eq 0 ]
   do
-    kubectl exec -ti pod/teleport-bz-horst tctl nodes add 2> /dev/null > nodes-add.out
+    kubectl exec pod/teleport-bz-horst tctl nodes add 2> /dev/null > nodes-add.out
     if [ \$? -eq 0 ]
     then
       ready=1

@@ -5,11 +5,11 @@ After=network.target
 [Service]
 Type=simple
 Restart=on-failure
-ExecStart=/usr/local/bin/teleport start --pid-file=/run/teleport.pid \
+ExecStart=/bin/bash -c "env ; exec /usr/local/bin/teleport start --pid-file=/run/teleport.pid \
    --roles=node \
    --token=$TELEPORT_TOKEN \
    --ca-pin=$TELEPORT_CA_PIN \
-   --auth-server=127.0.0.1:3025
+   --auth-server=127.0.0.1:3025"
 ExecReload=/bin/kill -HUP $MAINPID
 PIDFile=/run/teleport.pid
 
