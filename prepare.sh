@@ -63,15 +63,23 @@ do
   fi
 done
 
-kubectl get nodes 2> /dev/null | grep -e '^\$CLUSTERNAME\s\s*Ready'
-if [ $? -ne 0 ]
+installK3S=1
+if [ -f /usr/local/bin/k3s ]
+then
+  kubectl get nodes 2> /dev/null | grep -e '^\$CLUSTERNAME\s\s*Ready'
+  if [ \$? -eq 0 ]
+  then
+    installK3S=0
+  fi
+fi
+if [ \$installK3S -eq 1 ]
 then
   curl -sfL https://get.k3s.io | sh -
   ready=0
   while [ \$ready -eq 0 ]
   do
     kubectl get nodes 2> /dev/null | grep -e '^\$CLUSTERNAME\s\s*Ready'
-    if [ $? -eq 0 ]
+    if [ \$? -eq 0 ]
     then
       ready=1 
     else
