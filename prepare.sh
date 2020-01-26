@@ -6,6 +6,11 @@ apt-get install -yy sharutils
 cat > setup-home-pal.sh <<EOF
 #!/bin/sh
 apt install -yy uuid curl jq sysstat tcpdump nmap python3-pip
+update-alternatives --set iptables /usr/sbin/iptables-legacy
+update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
+update-alternatives --set arptables /usr/sbin/arptables-legacy
+update-alternatives --set ebtables /usr/sbin/ebtables-legacy
+systemctl disable nftables.service
 pip3 install yq
 pip3 install esphome
 PALDIR=/tmp/home-pal-\$(uuid)
